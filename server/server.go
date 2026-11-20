@@ -20,10 +20,12 @@ import (
 	"time"
 
 	"github.com/Autumn-27/artex/agent"
+	"github.com/Autumn-27/artex/bounty"
 	"github.com/Autumn-27/artex/db"
 	"github.com/Autumn-27/artex/intercept"
 	"github.com/Autumn-27/artex/llmpool"
 	"github.com/Autumn-27/artex/llmrec"
+	"github.com/Autumn-27/artex/localize"
 	"github.com/Autumn-27/artex/report"
 	"github.com/Autumn-27/artex/traffic"
 	"github.com/Autumn-27/norma/llm"
@@ -1372,8 +1374,10 @@ func (s *Server) testLLM(w http.ResponseWriter, r *http.Request) {
 		APIKey           string `json:"api_key"`
 		ThinkingType     string `json:"thinking_type"`
 		ReasoningEffort  string `json:"reasoning_effort"`
-		ProfileID        *int64 `json:"profile_id"`         // 测已存 profile 时传入：api_key 为空则用它存的 key
-		Streaming        *bool  `json:"streaming"`          // 省略=流式，与保存 profile 时同一套默认
+		ProfileID        *int64 `json:"profile_id"` // 测已存 profile 时传入：api_key 为空则用它存的 key
+		Streaming        *bool  `json:"streaming"`  // 省略=流式，与保存 profile 时同一套默认
+		CheckTools       bool   `json:"check_tools"`
+		MaxTokensField   string `json:"max_tokens_field"`
 		SessionHeaderKey string `json:"session_header_key"` // 非空=测试时也带该自定义会话头，值为一次性随机 session id
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -1394,12 +1398,14 @@ func (s *Server) testLLM(w http.ResponseWriter, r *http.Request) {
 	// 见 TestConnection)。opencode zen 等强制要求 x-opencode-session 的端点，缺了它
 	// 直接 400，必须在测试路径上也带上，否则"对话通、测试 400"。
 	cfg.SessionHeaderKey = req.SessionHeaderKey
+	cfg.MaxTokensField = req.MaxTokensField
 	// API Key 解析优先级：表单输入 > 指定 profile 存的 key > 全局配置的 key。
 	// 已存 profile 的 key 不回传浏览器，所以测试已存配置时表单为空，需从 DB 取。
 	// 会话头名同理：表单未带时用已存 profile 的值兜底。
 	if req.ProfileID != nil && (cfg.APIKey == "" || cfg.SessionHeaderKey == "") {
 		if p, err := s.m.pg.ProfileByID(*req.ProfileID); err == nil && p != nil {
-			if cfg.APIKey == "" {
+			stored := agent.ConfigFrom(p.Format, p.Model, p.BaseURL, "", "")
+			if cfg.APIKey == "" && cfg.Format == stored.Format && cfg.BaseURL == stored.BaseURL {
 				cfg.APIKey = p.APIKey
 			}
 			if cfg.SessionHeaderKey == "" {
@@ -1409,17 +1415,26 @@ func (s *Server) testLLM(w http.ResponseWriter, r *http.Request) {
 	}
 	if cfg.APIKey == "" {
 		s.cfgMu.Lock()
-		cfg.APIKey = s.llmCfg.APIKey
+		if cfg.Format == s.llmCfg.Format && cfg.BaseURL == s.llmCfg.BaseURL {
+			cfg.APIKey = s.llmCfg.APIKey
+		}
 		s.cfgMu.Unlock()
 	}
 	if cfg.APIKey == "" {
-		writeJSON(w, 200, map[string]any{"ok": false, "error": "未提供 API Key"})
+		writeJSON(w, 200, map[string]any{"ok": false, "error": "Informe uma chave para o endpoint selecionado"})
 		return
 	}
 	// 重试参数【不】带进连接测试:测试有 30s 硬超时,把配置的重试次数/长间隔叠上去
 	// 只会让一个本来能用的端点测成"超时失败"。测试看的是"这个端点通不通",重试节奏
 	// 是跑起来之后的事。
-	lat, reply, err := agent.TestConnection(r.Context(), cfg)
+	var lat time.Duration
+	var reply string
+	var err error
+	if req.CheckTools {
+		lat, reply, err = agent.TestToolConnection(r.Context(), cfg)
+	} else {
+		lat, reply, err = agent.TestConnection(r.Context(), cfg)
+	}
 	if err != nil {
 		writeJSON(w, 200, map[string]any{"ok": false, "error": err.Error()})
 		return
@@ -1457,6 +1472,7 @@ type createTaskReq struct {
 	CoverageEnabled      *bool    `json:"coverage_enabled,omitempty"`  // 资产覆盖度功能;省略/null=默认开(true)。false=关闭覆盖度计算/展示/自动累积范围+隐藏 add_task_scope/list_untested_assets。company 关联不受影响。
 	// InterceptRules 任务级资产拦截/允许规则(创建时录入,存 task_intercept_rules,不进全局表)。
 	InterceptRules []taskInterceptRuleReq `json:"intercept_rules,omitempty"`
+	BountyPolicy   *bounty.Policy         `json:"bounty_policy,omitempty"`
 }
 
 func (s *Server) createTask(w http.ResponseWriter, r *http.Request) {
@@ -1464,6 +1480,18 @@ func (s *Server) createTask(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeErr(w, 400, "bad json: "+err.Error())
 		return
+	}
+	if req.BountyPolicy != nil {
+		if err := req.BountyPolicy.Validate(); err != nil {
+			writeErr(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		if req.TimeoutSeconds < 60 || req.TimeoutSeconds > 7200 {
+			writeErr(w, http.StatusBadRequest, "O teste guiado deve durar entre 1 e 120 minutos")
+			return
+		}
+		req.Description = req.BountyPolicy.Description(req.Description)
+		req.InterceptRules = append(bountyScopeRules(req.BountyPolicy), req.InterceptRules...)
 	}
 	if strings.TrimSpace(req.Description) == "" {
 		req.Description = "未命名任务"
@@ -3891,6 +3919,12 @@ func cors(next http.Handler) http.Handler {
 }
 
 func writeJSON(w http.ResponseWriter, code int, v any) {
+	// Translate only built-in errors. Findings and user content remain untouched.
+	if response, ok := v.(map[string]any); ok {
+		if message, ok := response["error"].(string); ok {
+			response["error"] = localize.Message(message)
+		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	_ = json.NewEncoder(w).Encode(v)

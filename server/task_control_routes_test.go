@@ -34,7 +34,7 @@ func TestWorkerControlRoutes(t *testing.T) {
 
 	// The single-worker route is still registered and reaches its JSON handler.
 	single := request("/api/tasks/missing/intents/1/control")
-	if single.Code != http.StatusNotFound || !strings.Contains(single.Body.String(), `"error":"task not found"`) {
+	if single.Code != http.StatusNotFound || !strings.Contains(single.Body.String(), `"error":"Tarefa não encontrada"`) {
 		t.Fatalf("single control route unavailable: status=%d body=%s", single.Code, single.Body.String())
 	}
 

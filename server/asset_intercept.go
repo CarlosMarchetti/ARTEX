@@ -141,6 +141,10 @@ func validateAssetInterceptRuleReq(req *assetInterceptRuleReq) error {
 	switch req.Kind {
 	case "exact_domain", "exact_url", "fuzzy_domain", "fuzzy_ip", "fuzzy_url":
 		// free-form, no format check
+	case "domain_suffix":
+		if strings.ContainsAny(req.Pattern, "/*: ") || !strings.Contains(req.Pattern, ".") {
+			return fmt.Errorf("Informe um domínio válido sem asterisco para o sufixo")
+		}
 	case "exact_ip":
 		if net.ParseIP(req.Pattern) == nil {
 			return fmt.Errorf("exact_ip 不是有效 IP 地址：%s", req.Pattern)

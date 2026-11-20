@@ -65,7 +65,7 @@ export default function SystemSettingsPage() {
   const saveWorkers = () => {
     const n = Number(workers);
     if (!Number.isInteger(n) || n <= 0) {
-      toast.error("并发数必须是大于 0 的整数");
+      toast.error("O número de simultaneidade deve ser um número inteiro maior que 0");
       return;
     }
     setSavingWorkers(true);
@@ -73,9 +73,9 @@ export default function SystemSettingsPage() {
       .setSettings({ workers: n })
       .then((s) => {
         apply(s);
-        toast.success("已保存并发工作 agent 数（对之后启动的任务生效）");
+        toast.success("Número de agentes de trabalho simultâneos salvos (efetivo para tarefas iniciadas posteriormente)");
       })
-      .catch((e) => toast.error("保存失败：" + (e as Error).message))
+      .catch((e) => toast.error("Não foi possível salvar:" + (e as Error).message))
       .finally(() => setSavingWorkers(false));
   };
 
@@ -85,9 +85,9 @@ export default function SystemSettingsPage() {
       .setSettings({ python_interpreter: pyInterp.trim() })
       .then((s) => {
         apply(s);
-        toast.success("已保存 Python 解释器配置");
+        toast.success("Configuração do interpretador Python salva");
       })
-      .catch((e) => toast.error("保存失败：" + (e as Error).message))
+      .catch((e) => toast.error("Não foi possível salvar:" + (e as Error).message))
       .finally(() => setSaving(false));
   };
   const detectPython = () => {
@@ -132,11 +132,11 @@ export default function SystemSettingsPage() {
       .setSettings({ agent_traffic_binding: v })
       .then((s) => {
         apply(s);
-        toast.success(v ? "已开启 Agent 自动绑定流量" : "已关闭 Agent 自动绑定流量");
+        toast.success(v ? "O tráfego de ligação automática do agente foi ativado" : "O tráfego de ligação automática do agente foi desativado");
       })
       .catch((e) => {
         setAgentTrafficBinding(!v);
-        toast.error(`保存失败：${(e as Error).message}`);
+        toast.error(`Não foi possível salvar:${(e as Error).message}`);
       })
       .finally(() => setSaving(false));
   };
@@ -155,11 +155,11 @@ export default function SystemSettingsPage() {
       .setSettings({ noa_compaction: v })
       .then((s) => {
         apply(s);
-        toast.success(v ? "已开启 noa 上下文压缩（对之后启动的运行生效）" : "已关闭 noa 上下文压缩（恢复内置压缩）");
+        toast.success(v ? "a compactação de contexto noa está habilitada (efetiva para execuções subsequentes)" : "compactação de contexto noa desativada (restaura a compactação integrada)");
       })
       .catch((e) => {
         setNoaCompaction(!v); // revert on failure
-        toast.error(`保存失败：${(e as Error).message}`);
+        toast.error(`Não foi possível salvar:${(e as Error).message}`);
       });
   };
 
@@ -170,10 +170,10 @@ export default function SystemSettingsPage() {
       .setSettings(patch)
       .then((s) => {
         apply(s);
-        toast.success("已保存网络搜索配置");
+        toast.success("Configuração de pesquisa de rede salva");
       })
       .catch((e) => {
-        toast.error("保存失败：" + (e as Error).message);
+        toast.error("Não foi possível salvar:" + (e as Error).message);
         api
           .settings()
           .then(apply)
@@ -189,9 +189,9 @@ export default function SystemSettingsPage() {
       .then((s) => {
         apply(s);
         setBraveKeyInput("");
-        toast.success("已保存 Brave API Key");
+        toast.success("Chave de API Brave salva");
       })
-      .catch((e) => toast.error("保存失败：" + (e as Error).message))
+      .catch((e) => toast.error("Não foi possível salvar:" + (e as Error).message))
       .finally(() => setSavingKey(false));
   };
 
@@ -202,9 +202,9 @@ export default function SystemSettingsPage() {
       .then((s) => {
         apply(s);
         setTavilyKeyInput("");
-        toast.success("已保存 Tavily API Key");
+        toast.success("Chave API Tavily salva");
       })
-      .catch((e) => toast.error("保存失败：" + (e as Error).message))
+      .catch((e) => toast.error("Não foi possível salvar:" + (e as Error).message))
       .finally(() => setSavingTavilyKey(false));
   };
 
@@ -214,9 +214,9 @@ export default function SystemSettingsPage() {
       .setSettings({ web_search_proxy: proxyInput.trim() })
       .then((s) => {
         apply(s);
-        toast.success(proxyInput.trim() ? "已保存出口代理" : "已清除出口代理（改为直连）");
+        toast.success(proxyInput.trim() ? "Agente de exportação salvo" : "Proxy de saída desmarcado (alterado para conexão direta)");
       })
-      .catch((e) => toast.error("保存失败：" + (e as Error).message))
+      .catch((e) => toast.error("Não foi possível salvar:" + (e as Error).message))
       .finally(() => setSavingProxy(false));
   };
 
@@ -226,9 +226,9 @@ export default function SystemSettingsPage() {
       .setSettings({ global_proxy: globalProxyInput.trim() })
       .then((s) => {
         apply(s);
-        toast.success(globalProxyInput.trim() ? "已保存全局代理" : "已清除全局代理（改为直连）");
+        toast.success(globalProxyInput.trim() ? "Agente global salvo" : "Proxy global limpo (alterado para conexão direta)");
       })
-      .catch((e) => toast.error("保存失败：" + (e as Error).message))
+      .catch((e) => toast.error("Não foi possível salvar:" + (e as Error).message))
       .finally(() => setSavingGlobalProxy(false));
   };
 
@@ -244,10 +244,10 @@ export default function SystemSettingsPage() {
         tavily_search_api_key: tavilyKeyInput,
       })
       .then((r) => {
-        if (r.ok) toast.success(`搜索测试成功 · ${r.backend} 返回 ${r.count} 条结果`);
-        else toast.error("搜索测试失败：" + (r.error || "未知错误"));
+        if (r.ok) toast.success(`Teste de pesquisa bem-sucedido· ${r.backend} Retorno ${r.count} resultados`);
+        else toast.error("Falha no teste de pesquisa:" + (r.error || "Erro desconhecido"));
       })
-      .catch((e) => toast.error("搜索测试失败：" + (e as Error).message))
+      .catch((e) => toast.error("Falha no teste de pesquisa:" + (e as Error).message))
       .finally(() => setTesting(false));
   };
 
@@ -257,8 +257,8 @@ export default function SystemSettingsPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 md:gap-6">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight">系统配置</h1>
-        <p className="text-muted-foreground text-sm">全局运行时开关</p>
+        <h1 className="text-xl font-semibold tracking-tight">Configurações gerais</h1>
+        <p className="text-muted-foreground text-sm">Comutador de tempo de execução global</p>
       </div>
 
       {/* 多列而非 grid：网络搜索卡片比其余高数倍，且高度随所选后端变化（brave/tavily
@@ -272,19 +272,20 @@ export default function SystemSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <RadioTowerIcon className="size-4" />
-              流量捕获
+              Captura de tráfego
             </CardTitle>
             <CardDescription>
-              开启后，所有 Agent 的 HTTP 流量经记录代理全量落库，并向 Agent 注入 traffic_search / traffic_get
-              工具与代理配置（提示词含代理说明）。
+              Após a ativação, todo o tráfego HTTP do Agente será registrado no banco de dados por meio do agente de gravação e tráfego_search/traffic_get será injetado no Agente.
+
+ Configuração de ferramenta e agente (a palavra do prompt contém a descrição do agente).
               <br />
-              关闭（默认）时不记录任何流量：Agent
-              <b>不会</b>拿到代理配置与流量工具，提示词也<b>不含</b>代理相关内容。切换后会即时重建 Agent 生效。
+              Não registrar nenhum tráfego quando desligado (padrão): Agente
+              <b>Não</b>Obtenha as ferramentas de configuração de proxy e tráfego, e as palavras de prompt também são<b>Não contém</b>Conteúdo relacionado ao agente. Após a troca, o Agente será reconstruído imediatamente para entrar em vigor.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between gap-4">
             <Label htmlFor="traffic-capture" className="text-sm font-normal text-muted-foreground">
-              {trafficCapture ? "已开启 · 正在记录流量并注入代理" : "已关闭 · 不记录、不注入代理"}
+              {trafficCapture ? "Habilitado · Gravação de tráfego e injeção de proxy" : "Fechado · Sem registro, sem injeção de proxy"}
             </Label>
             <Switch
               id="traffic-capture"
@@ -299,19 +300,20 @@ export default function SystemSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <RadioTowerIcon className="size-4" />
-              Agent 自动绑定流量
+              Agente vincula tráfego automaticamente
             </CardTitle>
             <CardDescription id="agent-traffic-binding-description">
-              默认关闭。开启后，漏洞入库时触发的报告 Agent 会核对已有 HTTP 请求/响应，关联对应流量后再编写报告。
-              <b>查阅数据包及额外的工具调用会增加 Token 消耗。</b>
+              Desligado por padrão. Quando ativado, o agente relator acionado quando uma vulnerabilidade é registrada no banco de dados verificará as solicitações/respostas HTTP existentes, correlacionará o tráfego correspondente e, em seguida, escreverá um relatório.
+              <b>Consultar pacotes de dados e chamadas de ferramentas adicionais aumentarão o consumo de Token.</b>
               <br />
-              TCP、未抓包或没有匹配流量时仍可正常上报。此开关不影响流量捕获、人工绑定及已保存证据的查看。 对下一轮 Agent
-              生效；关闭后会立即拒绝新的自动绑定。
+              TCP, nenhuma captura de pacote ou nenhum tráfego correspondente ainda pode ser relatado normalmente. Essa opção não afeta a captura de tráfego, a vinculação manual e a visualização de evidências salvas. Para a próxima rodada de Agente
+
+ entra em vigor; novas vinculações automáticas são rejeitadas imediatamente quando desativadas.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between gap-4">
             <Label htmlFor="agent-traffic-binding" className="text-sm font-normal text-muted-foreground">
-              {agentTrafficBinding ? "已开启 · 会增加 Token 消耗" : "已关闭 · 可继续人工绑定"}
+              {agentTrafficBinding ? "Habilitado · Aumentará o consumo de Token" : "Fechado · A vinculação manual pode continuar"}
             </Label>
             <Switch
               id="agent-traffic-binding"
@@ -327,39 +329,42 @@ export default function SystemSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <RadioTowerIcon className="size-4" />
-              全局代理
+              Agente global
             </CardTitle>
             <CardDescription>
-              所有 Agent 的<b>目标流量</b>经此代理出网（隐藏源 IP / 走跳板）。支持 <b>http / https / socks5</b>，可带{" "}
-              <code>user:pass</code> 认证。留空=直连。
+              Todos os Agentes<b>Fluxo alvo</b>Saia da rede através deste proxy (oculte o IP de origem/pegue o trampolim). suporte <b>http / https / socks5</b>, pode levar{" "}
+              <code>user:pass</code> Autenticação. Deixe em branco = conexão direta.
               <br />
-              开启<b>流量捕获</b>时，它作为记录代理的<b>上游</b>（流量仍全量落库，再经此代理出网）；关闭捕获时，直接注入
-              Agent 的 bash / WebFetch 出网。与网络搜索代理、LLM 代理相互独立。
+              Ligar<b>Captura de tráfego</b>, atua como agente de gravação<b>a montante</b>(O tráfego ainda é totalmente descartado na biblioteca e depois sai da rede por meio deste proxy); quando a captura está desligada, injeção direta
+
+ O bash/WebFetch do agente sai da rede. Independente do agente de pesquisa de rede e do agente LLM.
               <br />
-              <b>提示</b>：socks5 在<b>关闭捕获</b>时依赖各命令行工具对 <code>ALL_PROXY</code> 的支持（curl
-              可用，部分工具可能忽略）； 若主要用 socks5，建议开启流量捕获——此路径由 MITM
-              亲自拨号，工具无感知、稳定生效。
+              <b>Dica</b>: meias5 pol.<b>Desativar captura</b>depende de cada ferramenta de linha de comando para <code>ALL_PROXY</code> suporte (ondulação
+
+ está disponível, algumas ferramentas podem ignorá-lo); se você usa principalmente meias5, é recomendado ativar a captura de tráfego - esse caminho é fornecido pelo MITM
+
+ Ligue pessoalmente, a ferramenta é invisível e funciona de forma estável.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             <Label htmlFor="global-proxy" className="text-sm font-normal text-muted-foreground">
-              代理地址
+              endereço proxy
             </Label>
             <div className="flex items-center gap-2">
               <Input
                 id="global-proxy"
                 autoComplete="off"
-                placeholder="socks5://user:pass@host:1080 或 http://host:port（留空=直连）"
+                placeholder="meias5://usuário:pass@host:1080 ou http://host:porta (deixe em branco = conexão direta)"
                 value={globalProxyInput}
                 disabled={!loaded || savingGlobalProxy}
                 onChange={(e) => setGlobalProxyInput(e.target.value)}
               />
               <Button type="button" onClick={saveGlobalProxy} disabled={!loaded || savingGlobalProxy}>
-                保存
+                Salvar
               </Button>
             </div>
             <p className="text-muted-foreground text-xs">
-              {globalProxyInput.trim() ? "已配置 · 所有目标流量经此代理出网" : "未配置 · 目标流量直连出网"}
+              {globalProxyInput.trim() ? "Configurado · Todo o tráfego alvo sai da rede através deste proxy" : "Não configurado·O tráfego de destino está diretamente conectado à rede"}
             </p>
           </CardContent>
         </Card>
@@ -368,20 +373,21 @@ export default function SystemSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <ShieldAlertIcon className="size-4" />
-              操作约束注入
+              Injeção de restrição operacional
             </CardTitle>
             <CardDescription>
-              开启后，把每个任务的<b>操作约束</b>（在任务总览「操作约束」里维护的 allow/deny 条目）拼进对应 Agent
-              的系统提示，用来框定探索边界（如「仅测当前端口」「禁止爆破」）。
+              Após a abertura, altere o<b>Restrições operacionais</b>(A entrada permitir/negar mantida na visão geral da tarefa &quot;Restrições de operação&quot;) soletrar no Agente correspondente
+ O prompt do sistema
+ é usado para enquadrar o limite de exploração (como &quot;testar apenas a porta atual&quot; e &quot;sem detonação&quot;).
               <br />
-              可分别控制注入到 <b>规划者（planner）</b>与 <b>执行者（worker）</b>
-              ；默认都开。切换即时生效（下一轮读取），无需重建 Agent。关闭后该 Agent 不再看到约束。
+              A injeção em <b>Planejador</b>e <b>Executor (trabalhador)</b>
+              ; Ambos estão habilitados por padrão. A mudança entra em vigor imediatamente (na próxima rodada de leitura) e não há necessidade de reconstruir o Agente. Após o fechamento, o Agente não vê mais as restrições.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
               <Label htmlFor="inject-planner" className="text-sm font-normal text-muted-foreground">
-                注入规划者（planner）{injectPlanner ? " · 已开启" : " · 已关闭"}
+                Planejador de injeção{injectPlanner ? " ·Já ligado" : " · Fechado"}
               </Label>
               <Switch
                 id="inject-planner"
@@ -392,7 +398,7 @@ export default function SystemSettingsPage() {
             </div>
             <div className="flex items-center justify-between gap-4">
               <Label htmlFor="inject-worker" className="text-sm font-normal text-muted-foreground">
-                注入执行者（worker）{injectWorker ? " · 已开启" : " · 已关闭"}
+                Injetar executor (trabalhador){injectWorker ? " ·Já ligado" : " · Fechado"}
               </Label>
               <Switch
                 id="inject-worker"
@@ -408,20 +414,22 @@ export default function SystemSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FlaskConicalIcon className="size-4" />
-              实验功能
+              Função experimental
             </CardTitle>
             <CardDescription>
-              尚在验证中的机制，默认关闭。可能改变 Agent 行为或影响稳定性，请在了解影响后启用。
+              O mecanismo que ainda está em verificação é fechado por padrão. Isso pode alterar o comportamento do Agente ou afetar a estabilidade. Ative-o depois de compreender o impacto.
               <br />
-              <b>noa 上下文压缩</b>：由模型主动压缩长对话历史（norma v0.4.0）。开启后平台接入的四类 Agent（
-              <b>规划者 / 执行者 / 主 Agent / 对话</b>）改用 noa 接管上下文，取代内置压缩，
-              压缩原文会归档到任务工作目录下便于回溯。切换即时生效（对之后启动的运行生效），无需重建 Agent；
-              关闭后立即恢复内置压缩。
+              <b>compressão de contexto noa</b>: O longo histórico de conversas é compactado ativamente pelo modelo (norma v0.4.0). Os quatro tipos de Agentes (
+              <b>Planejador/Executor/Agente Principal/Diálogo</b>) use noa para assumir o controle do contexto em vez da compactação integrada,
+
+ O texto original compactado será arquivado no diretório de trabalho da tarefa para facilitar o retrocesso. A mudança entra em vigor imediatamente (efetiva para execuções subsequentes) e não há necessidade de reconstruir o Agente;
+
+ Retoma a compactação integrada imediatamente após o fechamento.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between gap-4">
             <Label htmlFor="noa-compaction" className="text-sm font-normal text-muted-foreground">
-              noa 上下文压缩{noaCompaction ? " · 已开启" : " · 已关闭"}
+              compressão de contexto noa{noaCompaction ? " ·Já ligado" : " · Fechado"}
             </Label>
             <Switch
               id="noa-compaction"
@@ -436,22 +444,23 @@ export default function SystemSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <SearchIcon className="size-4" />
-              网络搜索
+              Pesquisa na Internet
             </CardTitle>
             <CardDescription>
-              这是网络搜索的<b>总开关 + 来源配置</b>。开启后，才能在<b>每个 Agent 的配置</b>里单独选择是否启用
-              <b>web_search</b>（仅返回标题/链接/摘要，不抓取正文；抓取由 WebFetch 负责）。网络搜索<b>不走</b>
-              记录代理，独立于流量捕获。
+              Esta é uma pesquisa na web<b>Chave principal + configuração da fonte</b>. Depois de ligá-lo, você pode<b>Configuração de cada Agente</b>selecione individualmente se deseja ativar
+              <b>web_search</b>(Apenas o título/link/resumo é retornado e o texto não é rastreado; o WebFetch é responsável pelo rastreamento). pesquisa na web<b>Não saindo</b>
+              Agente de registro, independente da captura de tráfego.
               <br />
-              来源可选 <b>DuckDuckGo（ddgs）</b>（无需 Key）、<b>Brave（免费版）</b>（需填写 Brave API Key）、{" "}
-              <b>Tavily</b>（需填写 Tavily API Key）或 <b>DeepSeek</b>（复用当前 LLM 配置）。总开关关闭时，各
-              Agent 的网络搜索开关不可用。
+              Fonte opcional <b>DuckDuckGo（ddgs）</b>(sem necessidade de chave),<b>Bravo (versão gratuita)</b>(A chave da API Brave precisa ser preenchida),{" "}
+              <b>Tavily</b>(A chave da API Tavily precisa ser preenchida) ou <b>DeepSeek</b>(reutilizar a configuração LLM atual). Quando o interruptor principal é desligado, cada
+
+ A opção de pesquisa de rede do agente não está disponível.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
               <Label htmlFor="web-search" className="text-sm font-normal text-muted-foreground">
-                {webSearch ? "总开关已开启 · 可在各 Agent 配置里单独启用" : "已关闭 · 各 Agent 无法启用网络搜索"}
+                {webSearch ? "A chave principal está ligada. Pode ser habilitado individualmente em cada configuração de Agente." : "Fechado·Cada agente não pode ativar a pesquisa de rede"}
               </Label>
               <Switch
                 id="web-search"
@@ -466,7 +475,7 @@ export default function SystemSettingsPage() {
 
             {webSearch && (
               <div className="flex items-center justify-between gap-4">
-                <Label className="text-sm font-normal text-muted-foreground">搜索来源</Label>
+                <Label className="text-sm font-normal text-muted-foreground">Fonte de pesquisa</Label>
                 <Select
                   value={backend}
                   disabled={!loaded || saving}
@@ -476,13 +485,13 @@ export default function SystemSettingsPage() {
                   }}
                 >
                   <SelectTrigger className="w-48 shrink-0">
-                    <SelectValue placeholder="选择来源" />
+                    <SelectValue placeholder="Selecionar fonte" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ddgs">DuckDuckGo（ddgs · 免费无 Key）</SelectItem>
-                    <SelectItem value="brave-free">Brave（免费版 · 需 Key）</SelectItem>
-                    <SelectItem value="tavily">Tavily（需 Key）</SelectItem>
-                    <SelectItem value="deepseek">DeepSeek（官方）</SelectItem>
+                    <SelectItem value="ddgs">DuckDuckGo (ddgs · Grátis sem chave)</SelectItem>
+                    <SelectItem value="brave-free">Brave (versão gratuita · Chave necessária)</SelectItem>
+                    <SelectItem value="tavily">Tavily (chave necessária)</SelectItem>
+                    <SelectItem value="deepseek">DeepSeek (oficial)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -490,19 +499,20 @@ export default function SystemSettingsPage() {
 
             {webSearch && backend === "deepseek" && (
               <div className="border-border/60 bg-muted/30 flex flex-col gap-2 rounded-md border p-3">
-                <p className="text-sm font-medium">DeepSeek 官方联网搜索</p>
+                <p className="text-sm font-medium">Pesquisa oficial do DeepSeek na Internet</p>
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  该来源直接复用<b>当前激活的 LLM 配置</b>。因此它
-                  <b>仅支持 DeepSeek 官方模型</b>，且该配置<b>必须使用 anthropic 协议</b>
-                  ——DeepSeek 的 OpenAI 协议端点不支持服务端搜索。切换 LLM 配置后此来源可能失效。
+                  Esta fonte é reutilizada diretamente<b>Configuração LLM atualmente ativa</b>. portanto
+                  <b>Suporta apenas modelos oficiais do DeepSeek</b>, e esta configuração<b>Protocolo antrópico deve ser usado</b>
+                  - O endpoint do protocolo OpenAI do DeepSeek não suporta pesquisa no lado do servidor. Esta fonte pode tornar-se inválida após mudar a configuração do LLM.
                 </p>
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  与其它来源不同，搜索由 <b>DeepSeek 服务端执行</b>：每次搜索会额外消耗一次模型调用（产生 Token
-                  费用），搜索请求<b>不经过上面的出口代理</b>，也<b>不计入流量留痕</b>；返回结果<b>只有标题和链接</b>
-                  （无摘要），需要正文时由 WebFetch 抓取。
+                  Ao contrário de outras fontes, pesquise por <b>Execução do servidor DeepSeek</b>: Cada pesquisa consumirá uma chamada de modelo adicional (gerando Token
+
+ taxa), solicitação de pesquisa<b>Sem passar pelo agente de exportação acima</b>, também<b>Não incluir traços de fluxo</b>; Resultado de retorno<b>Somente título e link</b>
+                  (sem resumo), rastreado pelo WebFetch quando o texto é necessário.
                 </p>
                 <p className="text-muted-foreground text-xs leading-relaxed">
-                  是否满足上述条件由你自行确认，系统不做拦截；可用下方「测试搜索」按钮实际跑一次来验证。
+                  Cabe a você confirmar se as condições acima foram atendidas e o sistema não irá interceptá-las; você pode usar o botão &quot;Testar pesquisa&quot; abaixo para executá-lo uma vez para verificar.
                 </p>
               </div>
             )}
@@ -511,14 +521,14 @@ export default function SystemSettingsPage() {
               <div className="flex flex-col gap-2">
                 <Label htmlFor="brave-key" className="text-sm font-normal text-muted-foreground">
                   Brave Search API Key
-                  {braveKeySet && <span className="ml-2 text-xs text-emerald-500">已配置</span>}
+                  {braveKeySet && <span className="ml-2 text-xs text-emerald-500">Configurado</span>}
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
                     id="brave-key"
                     type="password"
                     autoComplete="off"
-                    placeholder={braveKeySet ? "已配置（留空则不变）" : "输入 Brave API Key"}
+                    placeholder={braveKeySet ? "Configurado (deixar em branco para permanecer inalterado)" : "Insira a chave da API do Brave"}
                     value={braveKeyInput}
                     disabled={!loaded || savingKey}
                     onChange={(e) => setBraveKeyInput(e.target.value)}
@@ -528,16 +538,16 @@ export default function SystemSettingsPage() {
                     onClick={saveBraveKey}
                     disabled={!loaded || savingKey || braveKeyInput.trim() === ""}
                   >
-                    保存
+                    Salvar
                   </Button>
                 </div>
                 {braveNeedsKey && (
                   <p className="text-xs text-amber-500">
-                    已选择 Brave 但尚未配置 Key —— 在保存 Key 之前，搜索工具不会启用。
+                    Brave está selecionado mas a Chave não foi configurada - a ferramenta de busca não será habilitada até que a Chave seja salva.
                   </p>
                 )}
                 <p className="text-muted-foreground text-xs">
-                  免费版额度约 2,000 次/月。前往 https://brave.com/search/api/ 获取 Key。
+                  A versão gratuita tem limite de cerca de 2.000 vezes/mês. Vá para https://brave.com/search/api/ para obter a chave.
                 </p>
               </div>
             )}
@@ -546,14 +556,14 @@ export default function SystemSettingsPage() {
               <div className="flex flex-col gap-2">
                 <Label htmlFor="tavily-key" className="text-sm font-normal text-muted-foreground">
                   Tavily Search API Key
-                  {tavilyKeySet && <span className="ml-2 text-xs text-emerald-500">已配置</span>}
+                  {tavilyKeySet && <span className="ml-2 text-xs text-emerald-500">Configurado</span>}
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
                     id="tavily-key"
                     type="password"
                     autoComplete="off"
-                    placeholder={tavilyKeySet ? "已配置（留空则不变）" : "输入 Tavily API Key（tvly-…）"}
+                    placeholder={tavilyKeySet ? "Configurado (deixar em branco para permanecer inalterado)" : "Insira a chave da API Tavily (tvly-…)"}
                     value={tavilyKeyInput}
                     disabled={!loaded || savingTavilyKey}
                     onChange={(e) => setTavilyKeyInput(e.target.value)}
@@ -563,38 +573,38 @@ export default function SystemSettingsPage() {
                     onClick={saveTavilyKey}
                     disabled={!loaded || savingTavilyKey || tavilyKeyInput.trim() === ""}
                   >
-                    保存
+                    Salvar
                   </Button>
                 </div>
                 {webSearch && backend === "tavily" && !tavilyKeySet && (
                   <p className="text-xs text-amber-500">
-                    已选择 Tavily 但尚未配置 Key —— 在保存 Key 之前，搜索工具不会启用。
+                    Tavily foi selecionado mas a Chave não foi configurada - a ferramenta de busca não será habilitada até que a Chave seja salva.
                   </p>
                 )}
-                <p className="text-muted-foreground text-xs">前往 https://tavily.com 注册并获取 API Key。</p>
+                <p className="text-muted-foreground text-xs">Acesse https://tavily.com para se registrar e obter a chave API.</p>
               </div>
             )}
 
             {webSearch && (
               <div className="flex flex-col gap-2">
                 <Label htmlFor="ws-proxy" className="text-sm font-normal text-muted-foreground">
-                  出口代理（可选）
+                  Agente de exportação (opcional)
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
                     id="ws-proxy"
                     autoComplete="off"
-                    placeholder="http://host:port 或 socks5://host:port（留空=直连）"
+                    placeholder="http://host:port ou meias5://host:port (deixe em branco = conexão direta)"
                     value={proxyInput}
                     disabled={!loaded || savingProxy}
                     onChange={(e) => setProxyInput(e.target.value)}
                   />
                   <Button type="button" onClick={saveProxy} disabled={!loaded || savingProxy}>
-                    保存
+                    Salvar
                   </Button>
                 </div>
                 <p className="text-muted-foreground text-xs">
-                  独立出口代理，仅用于访问搜索端点（VPN/SOCKS 等）。与记录流量的 MITM 代理无关；网络不通时经此代理访问。
+                  Proxy de saída independente, usado apenas para acessar endpoints de pesquisa (VPN/SOCKS, etc.). Não tem nada a ver com o proxy MITM que registra o tráfego; ele é acessado através deste proxy quando a rede está indisponível.
                 </p>
               </div>
             )}
@@ -602,7 +612,7 @@ export default function SystemSettingsPage() {
             {webSearch && (
               <div className="flex items-center justify-between gap-4 border-t pt-4">
                 <p className="text-muted-foreground text-xs">
-                  用当前配置（来源 + 代理 + Key）实际搜索一次「test」，验证是否可用。
+                  Use a configuração atual (fonte + agente + chave) para realmente pesquisar por &quot;teste&quot; para verificar se ele está disponível.
                 </p>
                 <Button
                   type="button"
@@ -611,7 +621,7 @@ export default function SystemSettingsPage() {
                   disabled={!loaded || testing}
                   className="shrink-0"
                 >
-                  {testing ? "测试中…" : "测试搜索"}
+                  {testing ? "Testando..." : "Pesquisa de teste"}
                 </Button>
               </div>
             )}
@@ -622,27 +632,28 @@ export default function SystemSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <RadioTowerIcon className="size-4" />
-              自定义脚本 · Python 解释器
+              Script personalizado · Intérprete Python
             </CardTitle>
             <CardDescription>
-              自定义 <b>script</b> 类型工具用它跑 Python。开机会自动检测（python3 优先）；此处可手填 venv /
-              特定版本的绝对路径，留空则运行时自动检测。
+              Personalizado <b>script</b> Ferramentas de tipo usam-no para executar Python. Ele será detectado automaticamente durante a inicialização (python3 é o preferido); venv / pode ser preenchido manualmente aqui
+
+ O caminho absoluto para uma versão específica. Se deixado em branco, será detectado automaticamente em tempo de execução.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <Input
                 className="font-mono text-sm"
-                placeholder="/usr/bin/python3（留空=自动检测）"
+                placeholder="/usr/bin/python3 (deixe em branco=detecção automática)"
                 value={pyInterp}
                 disabled={!loaded || saving}
                 onChange={(e) => setPyInterp(e.target.value)}
               />
               <Button variant="outline" onClick={detectPython} disabled={!loaded || saving}>
-                重新检测
+                Redetecção
               </Button>
               <Button onClick={savePython} disabled={!loaded || saving}>
-                保存
+                Salvar
               </Button>
             </div>
           </CardContent>
@@ -652,11 +663,11 @@ export default function SystemSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <CpuIcon className="size-4" />
-              工作并发 · Work Agent 数
+              Simultaneidade de trabalho · Número de Agentes de Trabalho
             </CardTitle>
             <CardDescription>
-              每个任务并发运行的工作 agent 数量（默认 3）。数值越大并发探测越多、消耗也越高。修改后
-              <b>对之后启动的任务生效</b>，正在运行的任务不受影响。
+              O número de agentes de trabalho em execução simultaneamente para cada tarefa (padrão 3). Quanto maior o valor, mais sondas simultâneas e maior o consumo. Após modificação
+              <b>Efeito em tarefas iniciadas posteriormente</b>, as tarefas em execução não são afetadas.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
@@ -671,7 +682,7 @@ export default function SystemSettingsPage() {
                 onChange={(e) => setWorkers(e.target.value)}
               />
               <Button onClick={saveWorkers} disabled={!loaded || savingWorkers}>
-                保存
+                Salvar
               </Button>
             </div>
           </CardContent>
@@ -681,17 +692,17 @@ export default function SystemSettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <KeyboardIcon className="size-4" />
-              会话输入框发送键位
+              Caixa de entrada da sessão envia chaves
             </CardTitle>
             <CardDescription>
-              对话页与任务详情的主 Agent 会话输入框共用此设置，选择后立即生效、无需保存。
+              A página de diálogo e a caixa de entrada principal da sessão do Agente de detalhes da tarefa compartilham esta configuração. Ele entra em vigor imediatamente após a seleção e não precisa ser salvo.
               <br />
-              该偏好<b>只存在本浏览器</b>，不随账号同步，换浏览器或清理站点数据后需重新设置。
+              Esta preferência<b>Só existe neste navegador</b>, não sincroniza com a conta e precisa ser redefinido após a troca de navegador ou limpeza dos dados do site.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between gap-4">
             <Label htmlFor="chat-send-mode" className="text-sm font-normal text-muted-foreground">
-              发送方式
+              Método de envio
             </Label>
             <Select value={sendMode} onValueChange={(v) => setChatSendMode(v as ChatSendMode)}>
               <SelectTrigger id="chat-send-mode" className="w-72">

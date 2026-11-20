@@ -1536,7 +1536,8 @@ func skillRelPath(file string) (string, string) {
 	if clean == "." || filepath.IsAbs(clean) || strings.HasPrefix(clean, "..") {
 		return "", "invalid path"
 	}
-	return clean, ""
+	// Skill paths are API identifiers and use forward slashes on every OS.
+	return filepath.ToSlash(clean), ""
 }
 
 // walkSkillFiles returns all files under root (relative to root), sorted,
@@ -1808,6 +1809,16 @@ func (s *Server) pgSaveProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	p := body.LLMProfile
 	p.APIKey = body.APIKey
+	if p.ID > 0 && strings.TrimSpace(body.APIKey) == "" {
+		if old, err := pg.ProfileByID(p.ID); err == nil && old != nil {
+			previous := agent.ConfigFrom(old.Format, old.Model, old.BaseURL, "", "")
+			next := agent.ConfigFrom(p.Format, p.Model, p.BaseURL, "", "")
+			if previous.Format != next.Format || previous.BaseURL != next.BaseURL {
+				writeErr(w, http.StatusBadRequest, "Informe a chave do novo provedor ao alterar o endpoint ou o formato")
+				return
+			}
+		}
+	}
 	p.Streaming = body.Streaming == nil || *body.Streaming
 	// 输出上限:负数无意义,归零(= 不发送该字段)。字段名开关只有 Chat Completions
 	// 用得上——anthropic 与 openai-responses 各自定死了字段名,存下来只会误导后续读者,
@@ -1992,7 +2003,11 @@ func (s *Server) pgListModels(w http.ResponseWriter, r *http.Request) {
 	apiKey := strings.TrimSpace(req.APIKey)
 	if apiKey == "" && req.ProfileID != nil {
 		if p, err := s.m.pg.ProfileByID(*req.ProfileID); err == nil && p != nil {
-			apiKey = p.APIKey
+			stored := agent.ConfigFrom(p.Format, p.Model, p.BaseURL, "", "")
+			requested := agent.ConfigFrom(req.Provider, "", req.BaseURL, "", "")
+			if stored.Format == requested.Format && stored.BaseURL == requested.BaseURL {
+				apiKey = p.APIKey
+			}
 		}
 	}
 	if apiKey == "" {

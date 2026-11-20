@@ -99,6 +99,8 @@ jobs:
   # ④ 多架构镜像 → 推 Docker Hub（复用 binaries 编好的 Linux 二进制，
   #    镜像里只装工具 + 放二进制；arm64 仅需模拟 apt 层，构建快很多）
   docker:
+    # Publishing a fork must never push to the upstream maintainer's image.
+    if: vars.PUBLISH_DOCKERHUB == 'true'
     needs: binaries
     runs-on: ubuntu-latest
     steps:
@@ -120,7 +122,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: autumn27/artex
+          images: ${{ vars.DOCKERHUB_IMAGE }}
           tags: |
             type=ref,event=tag
             type=raw,value=latest
