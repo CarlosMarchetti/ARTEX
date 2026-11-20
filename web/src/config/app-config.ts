@@ -7,7 +7,7 @@ export const APP_CONFIG = {
   version: packageJson.version,
   copyright: `© ${currentYear}, ARTEX.`,
   meta: {
-    title: "ARTEX — 自主渗透测试控制台",
-    description: "LLM 驱动的自主渗透测试系统控制台",
+    title: "ARTEX PT-BR — Pentest e Bug Bounty",
+    description: "Testes assistidos por IA, escopo documentado e evidências organizadas, em português.",
   },
 };

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Autumn-27/artex/config"
+	"github.com/Autumn-27/artex/localize"
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib" // pgx database/sql driver ("pgx")
 )
@@ -160,6 +161,10 @@ func Open(dsn string) (*DB, error) {
 		if err := applySchemaWithRetry(context.Background(), conn, time.Sleep); err != nil {
 			return fmt.Errorf("apply schema: %w", err)
 		}
+		if _, err := conn.ExecContext(context.Background(), llmUsageSchema); err != nil {
+			return fmt.Errorf("initialize token usage: %w", err)
+		}
+		if _, err := conn.ExecContext(context.Background(), llmUsageSchema); err != nil { return fmt.Errorf("initialize token usage: %w", err) }
 		if err := d.seedBuiltins(); err != nil {
 			return fmt.Errorf("seed builtins: %w", err)
 		}
@@ -221,7 +226,7 @@ func (d *DB) seedBuiltins() error {
 INSERT INTO agents(key, name, description, role, builtin, enabled, interactive_shell, run_seconds)
 VALUES ($1, $2, NULLIF($3,''), $4, true, true, $5, COALESCE($6, 1200))
 ON CONFLICT (key) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description
-RETURNING id`, a.key, a.name, a.desc, a.role, a.interactiveShell, a.runSeconds).Scan(&agentID)
+RETURNING id`, a.key, localize.Message(a.name), localize.Message(a.desc), a.role, a.interactiveShell, a.runSeconds).Scan(&agentID)
 		if err != nil {
 			return fmt.Errorf("agent %s: %w", a.key, err)
 		}
@@ -231,7 +236,7 @@ INSERT INTO agent_prompt_vars(agent_id, var_name, description, example, source)
 VALUES ($1, $2, $3, $4, $5)
 ON CONFLICT (agent_id, var_name) DO UPDATE
   SET description = EXCLUDED.description, example = EXCLUDED.example, source = EXCLUDED.source`,
-				agentID, v.name, v.desc, v.example, v.source); err != nil {
+				agentID, v.name, localize.Message(v.desc), v.example, v.source); err != nil {
 				return fmt.Errorf("agent %s var %s: %w", a.key, v.name, err)
 			}
 		}

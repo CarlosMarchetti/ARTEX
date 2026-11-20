@@ -1242,7 +1242,7 @@ CREATE TABLE IF NOT EXISTS asset_intercept_rules (
     id          BIGSERIAL PRIMARY KEY,
     enabled     BOOLEAN NOT NULL DEFAULT true,
     kind        TEXT NOT NULL CHECK (kind IN (
-                    'exact_domain', 'exact_ip', 'exact_url',
+                    'exact_domain', 'exact_ip', 'exact_url', 'domain_suffix',
                     'fuzzy_domain', 'fuzzy_ip', 'fuzzy_url',
                     'cidr')),
     pattern     TEXT NOT NULL,
@@ -1270,7 +1270,7 @@ CREATE TABLE IF NOT EXISTS task_intercept_rules (
     enabled     BOOLEAN NOT NULL DEFAULT true,
     action      TEXT NOT NULL DEFAULT 'block' CHECK (action IN ('block','allow')),
     kind        TEXT NOT NULL CHECK (kind IN (
-                    'exact_domain', 'exact_ip', 'exact_url',
+                    'exact_domain', 'exact_ip', 'exact_url', 'domain_suffix',
                     'fuzzy_domain', 'fuzzy_ip', 'fuzzy_url',
                     'cidr')),
     pattern     TEXT NOT NULL,
@@ -1384,3 +1384,11 @@ CREATE INDEX IF NOT EXISTS idx_notification_deliveries_batch
     ON notification_deliveries(batch_id) WHERE batch_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_notification_deliveries_channel
     ON notification_deliveries(channel_id, id DESC);
+
+-- PT-BR fork: strict subdomain scope, including upgrades of existing databases.
+ALTER TABLE asset_intercept_rules DROP CONSTRAINT IF EXISTS asset_intercept_rules_kind_check;
+ALTER TABLE asset_intercept_rules ADD CONSTRAINT asset_intercept_rules_kind_check
+  CHECK (kind IN ('exact_domain','exact_ip','exact_url','domain_suffix','fuzzy_domain','fuzzy_ip','fuzzy_url','cidr'));
+ALTER TABLE task_intercept_rules DROP CONSTRAINT IF EXISTS task_intercept_rules_kind_check;
+ALTER TABLE task_intercept_rules ADD CONSTRAINT task_intercept_rules_kind_check
+  CHECK (kind IN ('exact_domain','exact_ip','exact_url','domain_suffix','fuzzy_domain','fuzzy_ip','fuzzy_url','cidr'));

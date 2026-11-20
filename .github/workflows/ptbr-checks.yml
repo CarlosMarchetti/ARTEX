@@ -1,0 +1,51 @@
+name: PT-BR checks
+on:
+  push:
+    branches: [main, feat/pt-br-bug-bounty]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --ignore-scripts
+        working-directory: web
+      - run: npx tsc --noEmit
+        working-directory: web
+      - run: npm run build:static
+        working-directory: web
+      - run: npm audit --omit=dev
+        working-directory: web
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: artex
+          POSTGRES_PASSWORD: artex-ci-only
+          POSTGRES_DB: artex_validation
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U artex -d artex_validation"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ARTEX_PG_DSN: postgres://artex:artex-ci-only@127.0.0.1:5432/artex_validation?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Verify changed behavior against isolated PostgreSQL
+        run: >-
+          go test -p 1 -timeout 120s ./bounty ./localize ./report ./agent ./db ./evidence ./server
+          -run 'Test(Policy|BuiltIn|Catalog|Portuguese|ToolConnection|GraphOverviewExpandsAssociatedCompanyScope|DomainSuffix|Bounty|Evidence|InterceptDetailHTTP|UploadSkillEncrypted|TaskCategoryBatchRoute|WorkerControlRoutes|NotifyChannelAPICreateValidation)'
+          -count=1

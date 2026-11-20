@@ -14,6 +14,8 @@ import (
 // AssetInterceptKindLabel 返回 kind 的中文标签，用于给 agent 的说明消息。
 func AssetInterceptKindLabel(kind string) string {
 	switch kind {
+	case "domain_suffix":
+		return "Subdomínios (sufixo estrito)"
 	case "exact_domain":
 		return "域名(全等)"
 	case "exact_ip":
@@ -64,6 +66,13 @@ func matchOne(r AssetInterceptRule, domains, ips, urls []string) (string, bool) 
 		for _, u := range urls {
 			if strings.TrimSpace(u) == p {
 				return u, true
+			}
+		}
+	case "domain_suffix":
+		suffix := "." + strings.ToLower(strings.TrimSuffix(p, "."))
+		for _, domain := range domains {
+			if strings.HasSuffix(strings.ToLower(strings.TrimSuffix(strings.TrimSpace(domain), ".")), suffix) {
+				return domain, true
 			}
 		}
 	case "fuzzy_domain":

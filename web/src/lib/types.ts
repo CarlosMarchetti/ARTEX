@@ -1276,6 +1276,7 @@ export type AssetInterceptKind =
   | "exact_domain"
   | "exact_ip"
   | "exact_url"
+  | "domain_suffix"
   | "fuzzy_domain"
   | "fuzzy_ip"
   | "fuzzy_url"

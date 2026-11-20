@@ -308,6 +308,8 @@ func IsQuotaExhaustedMessage(message string) bool {
 		"billing hard limit", "billing_not_active", "credit balance", "insufficient credit",
 		"insufficient balance", "balance is too low", "payment required", "status 402",
 		"余额不足", "额度不足", "额度已用尽", "欠费",
+		"saldo insuficiente", "créditos insuficientes", "creditos insuficientes",
+		"cota diária esgotada", "cota diaria esgotada", "cota gratuita esgotada",
 	}
 	for _, marker := range markers {
 		if strings.Contains(message, marker) {
@@ -432,8 +434,10 @@ func logTestConnection(c Config, capt *llmrec.Capture) {
 		return
 	}
 	for i, a := range attempts {
+		body := a.Body
+		if c.APIKey != "" { body = strings.ReplaceAll(body,c.APIKey,"[redacted]") }
 		log.Printf("[llm-test] %s / %s @ %s — 尝试 %d/%d HTTP %d\n响应体: %s",
-			c.Provider(), c.Model, c.BaseURL, i+1, len(attempts), a.Status, clipBody(a.Body))
+			c.Provider(), c.Model, c.BaseURL, i+1, len(attempts), a.Status, clipBody(body))
 	}
 }
 
@@ -480,7 +484,7 @@ func TestConnection(ctx context.Context, c Config) (time.Duration, string, error
 	// EscalateMaxTokens 保持 false:不因截断而抬额重试,避免 resume 循环空烧。
 	reply, err := agentcore.Run(ctx, agentcore.Options{
 		Provider:       prov,
-		SystemPrompt:   []string{"你是连接测试。直接输出两个字符 OK 即可，不要思考、不要解释、不要别的。"},
+		SystemPrompt:   []string{"Teste de conexão. Responda apenas OK, sem explicações."},
 		PermissionMode: acperm.ModeBypass,
 		MaxTurns:       1,
 		MaxTokens:      8192,

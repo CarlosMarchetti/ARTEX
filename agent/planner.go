@@ -404,7 +404,7 @@ func (p *Planner) Plan(ctx context.Context, taskID int64, as *db.AssetStore, ts 
 	}
 	opts := agentcore.Options{
 		Provider:        p.prov,
-		SystemPrompt:    system,
+		SystemPrompt:    append(system, portugueseOutputInstruction),
 		DynamicBoundary: boundary,
 		Tools:           tools,
 		DeferredTools:   def.Deferred,

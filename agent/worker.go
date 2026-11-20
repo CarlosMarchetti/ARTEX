@@ -428,7 +428,7 @@ func (w *Worker) execute(ctx context.Context, name string, taskID int64, as *db.
 	}
 	opts := agentcore.Options{
 		Provider:        w.prov,
-		SystemPrompt:    system,
+		SystemPrompt:    append(system, portugueseOutputInstruction),
 		DynamicBoundary: boundary,
 		Tools:           tools,
 		DeferredTools:   def.Deferred,
